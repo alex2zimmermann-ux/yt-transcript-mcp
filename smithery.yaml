@@ -1,0 +1,28 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      mode:
+        type: string
+        enum: [standalone, backend]
+        default: standalone
+        description: "standalone uses youtube-transcript-api directly, backend connects to a VPS service"
+      backendUrl:
+        type: string
+        default: ""
+        description: "Backend service URL (only for backend mode)"
+      backendApiKey:
+        type: string
+        default: ""
+        description: "API key for backend service (only for backend mode)"
+  commandFunction:
+    |-
+    (config) => ({
+      command: "yt-transcript-mcp",
+      env: {
+        YT_MCP_MODE: config.mode || "standalone",
+        YT_MCP_BACKEND_URL: config.backendUrl || "",
+        YT_MCP_BACKEND_API_KEY: config.backendApiKey || ""
+      }
+    })

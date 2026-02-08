@@ -1,0 +1,22 @@
+services:
+  standalone:
+    build: .
+    environment:
+      - YT_MCP_MODE=standalone
+      - YT_MCP_TRANSPORT=streamable-http
+    ports:
+      - "8080:8000"
+    profiles:
+      - standalone
+
+  backend:
+    build: .
+    environment:
+      - YT_MCP_MODE=backend
+      - YT_MCP_BACKEND_URL=http://148.230.105.106:8300
+      - YT_MCP_BACKEND_API_KEY=${YT_MCP_BACKEND_API_KEY}
+      - YT_MCP_TRANSPORT=streamable-http
+    ports:
+      - "8080:8000"
+    profiles:
+      - backend

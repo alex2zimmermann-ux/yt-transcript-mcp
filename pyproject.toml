@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "yt-transcript-mcp"
+version = "1.0.0"
+description = "MCP server for YouTube transcript extraction"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [{name = "Alex"}]
+dependencies = [
+    "mcp[cli]>=1.8.0",
+    "youtube-transcript-api>=1.0.0",
+    "httpx>=0.27.0",
+    "pydantic-settings>=2.0.0",
+    "cachetools>=5.3.0",
+]
+
+[project.scripts]
+yt-transcript-mcp = "yt_transcript_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/yt_transcript_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "respx>=0.22.0",
+    "pytest-cov>=6.0",
+]

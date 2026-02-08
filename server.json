@@ -1,0 +1,34 @@
+{
+  "name": "YouTube Transcript",
+  "description": "Extract, search, and analyze YouTube video transcripts. Supports single videos, batch processing, keyword search, and time-chunked summaries.",
+  "vendor": "yt-transcript-mcp",
+  "sourceUrl": "https://github.com/alexruco/yt-transcript-mcp",
+  "homepage": "https://github.com/alexruco/yt-transcript-mcp",
+  "license": "MIT",
+  "runtime": "python",
+  "config": {
+    "command": "yt-transcript-mcp",
+    "args": [],
+    "env": {
+      "YT_MCP_MODE": "standalone"
+    }
+  },
+  "tools": [
+    {
+      "name": "get_transcript",
+      "description": "Get the transcript of a YouTube video"
+    },
+    {
+      "name": "search_transcript",
+      "description": "Search for keywords in a YouTube video transcript"
+    },
+    {
+      "name": "get_transcript_summary",
+      "description": "Get a transcript structured in time chunks"
+    },
+    {
+      "name": "batch_transcripts",
+      "description": "Get transcripts for multiple YouTube videos at once"
+    }
+  ]
+}
