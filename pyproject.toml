@@ -5,11 +5,23 @@ build-backend = "hatchling.build"
 [project]
 name = "yt-transcript-mcp"
 version = "1.0.0"
-description = "MCP server for YouTube transcript extraction"
+description = "MCP server for YouTube transcript extraction, search, and analysis"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
-authors = [{name = "Alex"}]
+authors = [{name = "Alex Zimmermann"}]
+keywords = ["mcp", "youtube", "transcript", "claude", "ai", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Multimedia :: Video",
+]
 dependencies = [
     "mcp[cli]>=1.8.0",
     "youtube-transcript-api>=1.0.0",
@@ -17,6 +29,11 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "cachetools>=5.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/alex2zimmermann-ux/yt-transcript-mcp"
+Repository = "https://github.com/alex2zimmermann-ux/yt-transcript-mcp"
+Issues = "https://github.com/alex2zimmermann-ux/yt-transcript-mcp/issues"
 
 [project.scripts]
 yt-transcript-mcp = "yt_transcript_mcp.server:main"

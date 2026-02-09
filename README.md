@@ -1,5 +1,10 @@
 # YouTube Transcript MCP Server
 
+[![PyPI version](https://badge.fury.io/py/yt-transcript-mcp.svg)](https://pypi.org/project/yt-transcript-mcp/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Smithery](https://smithery.ai/badge/@alex2zimmermann-ux/yt-transcript-mcp)](https://smithery.ai/server/@alex2zimmermann-ux/yt-transcript-mcp)
+
 An MCP (Model Context Protocol) server that extracts, searches, and analyzes YouTube video transcripts. Works with Claude Desktop, Cursor, and any MCP-compatible client.
 
 ## Features
@@ -20,7 +25,7 @@ pip install yt-transcript-mcp
 ### From source
 
 ```bash
-git clone https://github.com/alexruco/yt-transcript-mcp
+git clone https://github.com/alex2zimmermann-ux/yt-transcript-mcp
 cd yt-transcript-mcp
 pip install .
 ```
