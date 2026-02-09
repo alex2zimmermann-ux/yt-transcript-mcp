@@ -5,7 +5,9 @@ import sys
 import time
 from collections import deque
 from contextlib import asynccontextmanager
+from typing import Annotated, Literal
 
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 
 from yt_transcript_mcp.cache import TranscriptCache
@@ -28,6 +30,13 @@ _provider = None
 _cache = None
 _settings = None
 _rate_window = deque()
+
+# Tool annotations for read-only API tools
+TOOL_ANNOTATIONS = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "openWorldHint": True,
+}
 
 
 @asynccontextmanager
@@ -100,19 +109,13 @@ def _segments_to_markdown(segments: list[TranscriptSegment]) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool()
+@mcp.tool(annotations=TOOL_ANNOTATIONS)
 async def get_transcript(
-    url: str,
-    language: str = "en",
-    format: str = "text",
+    url: Annotated[str, Field(description="YouTube video URL or video ID (e.g. https://youtube.com/watch?v=dQw4w9WgXcQ or just dQw4w9WgXcQ)")],
+    language: Annotated[str, Field(default="en", description="ISO 639-1 language code for the transcript (e.g. en, de, es, fr, ja, ko)")] = "en",
+    format: Annotated[Literal["text", "segments", "both"], Field(default="text", description="Output format: text for plain text, segments for timestamped segments, both for combined output")] = "text",
 ) -> str:
-    """Get the transcript of a YouTube video.
-
-    Args:
-        url: YouTube video URL or video ID
-        language: Language code (e.g. 'en', 'de', 'es'). Default: 'en'
-        format: Output format - 'text' (plain text), 'segments' (timestamped), or 'both'. Default: 'text'
-    """
+    """Get the full transcript of a YouTube video in the specified language and format."""
     _check_rate_limit()
 
     video_id = extract_video_id(url)
@@ -139,21 +142,14 @@ async def get_transcript(
     return f"{header}\n{body}"
 
 
-@mcp.tool()
+@mcp.tool(annotations=TOOL_ANNOTATIONS)
 async def search_transcript(
-    url: str,
-    query: str,
-    language: str = "en",
-    context_segments: int = 1,
+    url: Annotated[str, Field(description="YouTube video URL or video ID to search in")],
+    query: Annotated[str, Field(description="Search query string (case-insensitive keyword or phrase to find in the transcript)")],
+    language: Annotated[str, Field(default="en", description="ISO 639-1 language code for the transcript (e.g. en, de, es, fr)")] = "en",
+    context_segments: Annotated[int, Field(default=1, ge=0, le=10, description="Number of surrounding transcript segments to include as context around each match")] = 1,
 ) -> str:
-    """Search for keywords in a YouTube video transcript.
-
-    Args:
-        url: YouTube video URL or video ID
-        query: Search query (case-insensitive)
-        language: Language code. Default: 'en'
-        context_segments: Number of surrounding segments to include. Default: 1
-    """
+    """Search for keywords or phrases in a YouTube video transcript and return matching segments with timestamps."""
     _check_rate_limit()
 
     video_id = extract_video_id(url)
@@ -195,19 +191,13 @@ async def search_transcript(
     return f"{header}\n{body}"
 
 
-@mcp.tool()
+@mcp.tool(annotations=TOOL_ANNOTATIONS)
 async def get_transcript_summary(
-    url: str,
-    language: str = "en",
-    chunk_minutes: int = 5,
+    url: Annotated[str, Field(description="YouTube video URL or video ID to summarize")],
+    language: Annotated[str, Field(default="en", description="ISO 639-1 language code for the transcript (e.g. en, de, es, fr)")] = "en",
+    chunk_minutes: Annotated[int, Field(default=5, ge=1, le=60, description="Size of each time chunk in minutes for grouping transcript segments")] = 5,
 ) -> str:
-    """Get a transcript structured in time chunks for easier analysis.
-
-    Args:
-        url: YouTube video URL or video ID
-        language: Language code. Default: 'en'
-        chunk_minutes: Size of each time chunk in minutes. Default: 5
-    """
+    """Get a transcript organized into time-based chunks for easier analysis of long videos."""
     _check_rate_limit()
 
     video_id = extract_video_id(url)
@@ -240,17 +230,12 @@ async def get_transcript_summary(
     return f"{header}\n" + "\n\n".join(parts)
 
 
-@mcp.tool()
+@mcp.tool(annotations=TOOL_ANNOTATIONS)
 async def batch_transcripts(
-    urls: list[str],
-    language: str = "en",
+    urls: Annotated[list[str], Field(description="List of YouTube video URLs or IDs to process (maximum 10 videos per batch)")],
+    language: Annotated[str, Field(default="en", description="ISO 639-1 language code for all transcripts (e.g. en, de, es, fr)")] = "en",
 ) -> str:
-    """Get transcripts for multiple YouTube videos at once (max 10).
-
-    Args:
-        urls: List of YouTube video URLs or IDs (max 10)
-        language: Language code. Default: 'en'
-    """
+    """Get transcripts for multiple YouTube videos in a single request (max 10 videos)."""
     _check_rate_limit()
 
     if len(urls) > 10:
@@ -282,17 +267,14 @@ async def batch_transcripts(
     return header + "\n---\n\n".join(results)
 
 
-
-# ── MCP Prompts (Smithery quality) ──────────────────────────────────────────
+# -- MCP Prompts --
 
 
 @mcp.prompt()
-def summarize_video(url: str) -> str:
-    """Generate a comprehensive summary of a YouTube video from its transcript.
-
-    Args:
-        url: YouTube video URL or video ID to summarize
-    """
+def summarize_video(
+    url: Annotated[str, Field(description="YouTube video URL or video ID to summarize")],
+) -> str:
+    """Generate a comprehensive summary of a YouTube video from its transcript."""
     return f"""Please use the get_transcript tool to fetch the transcript for this YouTube video: {url}
 
 Then provide a comprehensive summary including:
@@ -304,13 +286,11 @@ Keep the summary concise but informative."""
 
 
 @mcp.prompt()
-def compare_videos(url1: str, url2: str) -> str:
-    """Compare the content of two YouTube videos side by side.
-
-    Args:
-        url1: First YouTube video URL or ID
-        url2: Second YouTube video URL or ID
-    """
+def compare_videos(
+    url1: Annotated[str, Field(description="First YouTube video URL or ID to compare")],
+    url2: Annotated[str, Field(description="Second YouTube video URL or ID to compare")],
+) -> str:
+    """Compare the content of two YouTube videos side by side."""
     return f"""Please use the batch_transcripts tool to fetch transcripts for these two videos:
 - Video 1: {url1}
 - Video 2: {url2}
@@ -323,13 +303,11 @@ Then compare them:
 
 
 @mcp.prompt()
-def find_key_moments(url: str, topic: str) -> str:
-    """Find and analyze key moments in a video related to a specific topic.
-
-    Args:
-        url: YouTube video URL or video ID
-        topic: The topic or keyword to search for
-    """
+def find_key_moments(
+    url: Annotated[str, Field(description="YouTube video URL or video ID to analyze")],
+    topic: Annotated[str, Field(description="The topic or keyword to search for in the video")],
+) -> str:
+    """Find and analyze key moments in a video related to a specific topic."""
     return f"""Please use the search_transcript tool to find mentions of "{topic}" in this video: {url}
 
 Then use get_transcript_summary to get the full time-chunked transcript.
@@ -341,12 +319,12 @@ Analyze and present:
 4. A summary of the overall stance on "{topic}" """
 
 
-# ── MCP Resources (Smithery quality) ────────────────────────────────────────
+# -- MCP Resources --
 
 
 @mcp.resource("youtube://help")
 def help_resource() -> str:
-    """Help guide for the YouTube Transcript MCP server."""
+    """Usage guide for the YouTube Transcript MCP server with examples for all tools."""
     return """# YouTube Transcript MCP Server - Help Guide
 
 ## Available Tools
@@ -376,10 +354,11 @@ Process multiple videos at once (max 10).
 
 ## Tips
 - Use video IDs or full YouTube URLs
-- Try different language codes if default transcript isn't available
+- Try different language codes if default transcript is not available
 - Use search_transcript to quickly find specific topics in long videos
 - Use get_transcript_summary for videos over 20 minutes
 """
+
 
 def main():
     settings = Settings()

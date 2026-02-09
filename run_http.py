@@ -14,6 +14,7 @@ from yt_transcript_mcp.server import (
     compare_videos,
     find_key_moments,
     help_resource,
+    TOOL_ANNOTATIONS,
 )
 
 server = FastMCP(
@@ -25,11 +26,11 @@ server = FastMCP(
     transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
 )
 
-# Register tools
-server.tool()(get_transcript)
-server.tool()(search_transcript)
-server.tool()(get_transcript_summary)
-server.tool()(batch_transcripts)
+# Register tools with annotations
+server.tool(annotations=TOOL_ANNOTATIONS)(get_transcript)
+server.tool(annotations=TOOL_ANNOTATIONS)(search_transcript)
+server.tool(annotations=TOOL_ANNOTATIONS)(get_transcript_summary)
+server.tool(annotations=TOOL_ANNOTATIONS)(batch_transcripts)
 
 # Register prompts
 server.prompt()(summarize_video)
