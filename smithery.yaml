@@ -9,20 +9,21 @@ startCommand:
         type: string
         enum: [standalone, backend]
         default: standalone
-        description: "standalone uses youtube-transcript-api directly, backend connects to a VPS service with Whisper fallback"
+        description: "standalone uses youtube-transcript-api directly, backend connects to a VPS service"
       backendUrl:
         type: string
         default: ""
-        description: "Backend service URL (only needed for backend mode)"
+        description: "Backend service URL (only for backend mode)"
       backendApiKey:
         type: string
         default: ""
-        description: "API key for backend service (only needed for backend mode)"
+        description: "API key for backend service (only for backend mode)"
+    required: []
   commandFunction:
     |-
     (config) => ({
-      command: "uv",
-      args: ["run", "yt-transcript-mcp"],
+      command: "uvx",
+      args: ["yt-transcript-mcp"],
       env: {
         YT_MCP_MODE: config.mode || "standalone",
         YT_MCP_BACKEND_URL: config.backendUrl || "",

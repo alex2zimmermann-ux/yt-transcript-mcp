@@ -282,6 +282,105 @@ async def batch_transcripts(
     return header + "\n---\n\n".join(results)
 
 
+
+# ── MCP Prompts (Smithery quality) ──────────────────────────────────────────
+
+
+@mcp.prompt()
+def summarize_video(url: str) -> str:
+    """Generate a comprehensive summary of a YouTube video from its transcript.
+
+    Args:
+        url: YouTube video URL or video ID to summarize
+    """
+    return f"""Please use the get_transcript tool to fetch the transcript for this YouTube video: {url}
+
+Then provide a comprehensive summary including:
+1. Main topic and key points
+2. Important quotes or statements
+3. A brief conclusion
+
+Keep the summary concise but informative."""
+
+
+@mcp.prompt()
+def compare_videos(url1: str, url2: str) -> str:
+    """Compare the content of two YouTube videos side by side.
+
+    Args:
+        url1: First YouTube video URL or ID
+        url2: Second YouTube video URL or ID
+    """
+    return f"""Please use the batch_transcripts tool to fetch transcripts for these two videos:
+- Video 1: {url1}
+- Video 2: {url2}
+
+Then compare them:
+1. What topics does each video cover?
+2. Where do they agree or disagree?
+3. Which provides more depth on the subject?
+4. Key differences in perspective or approach"""
+
+
+@mcp.prompt()
+def find_key_moments(url: str, topic: str) -> str:
+    """Find and analyze key moments in a video related to a specific topic.
+
+    Args:
+        url: YouTube video URL or video ID
+        topic: The topic or keyword to search for
+    """
+    return f"""Please use the search_transcript tool to find mentions of "{topic}" in this video: {url}
+
+Then use get_transcript_summary to get the full time-chunked transcript.
+
+Analyze and present:
+1. All timestamps where "{topic}" is discussed
+2. Context around each mention
+3. The speaker's main points about this topic
+4. A summary of the overall stance on "{topic}" """
+
+
+# ── MCP Resources (Smithery quality) ────────────────────────────────────────
+
+
+@mcp.resource("youtube://help")
+def help_resource() -> str:
+    """Help guide for the YouTube Transcript MCP server."""
+    return """# YouTube Transcript MCP Server - Help Guide
+
+## Available Tools
+
+### get_transcript
+Extract the full transcript from a YouTube video.
+- Supports multiple languages (en, de, es, fr, ja, ko, zh, etc.)
+- Three output formats: text, segments (with timestamps), or both
+- Example: get_transcript(url="https://youtube.com/watch?v=VIDEO_ID", language="en", format="segments")
+
+### search_transcript
+Search for specific keywords within a video transcript.
+- Case-insensitive search
+- Shows surrounding context segments
+- Example: search_transcript(url="VIDEO_ID", query="machine learning", context_segments=2)
+
+### get_transcript_summary
+Get the transcript organized in time chunks for analysis.
+- Configurable chunk size (default: 5 minutes)
+- Great for long videos
+- Example: get_transcript_summary(url="VIDEO_ID", chunk_minutes=10)
+
+### batch_transcripts
+Process multiple videos at once (max 10).
+- Returns preview of each transcript
+- Example: batch_transcripts(urls=["VIDEO1", "VIDEO2"], language="en")
+
+## Tips
+- Use video IDs or full YouTube URLs
+- Try different language codes if default transcript isn't available
+- Use search_transcript to quickly find specific topics in long videos
+- Use get_transcript_summary for videos over 20 minutes
+"""
+
 def main():
     settings = Settings()
     if settings.transport == Transport.STREAMABLE_HTTP:
